@@ -1,4 +1,4 @@
-# skripsi-patia
+# Sparql + Slim 3 + Vue 2
 
 > A Vue.js project
 
