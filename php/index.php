@@ -7,6 +7,8 @@ require '../vendor/autoload.php';
 
 $app = new \Slim\App(new \Slim\Container);
 
+require 'container.php';
+
 $app->add(function ($req, $res, $next) {
     $response = $next($req, $res);
     return $response

@@ -32,6 +32,8 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations } from 'vuex'
+
 export default {
   name: 'hello',
   created () {
@@ -41,8 +43,7 @@ export default {
     return {
       yourName: '',
       funcReq: [],
-      checkedReqs: [],
-      msg: 'Welcome to Your Vue.js App'
+      checkedReqs: []
     }
   },
   computed: {
@@ -51,18 +52,24 @@ export default {
     },
     isDataValid () {
       return this.nameLength && this.checkedReqs.length
-    }
+    },
+    ...mapGetters(['api'])
   },
   methods: {
     fetchData () {
-      this.$http.get('http://localhost:6969/functional-requirement').then(res => {
+      this.$http.get(`${this.api}/functional-requirement`).then(res => {
         this.funcReq = res.body
       })
     },
-
     onNextClicked () {
-      //
-    }
+      if (this.isDataValid) {
+        this.$http.post(`${this.api}/functional-requirement`, { checkedReqs: this.checkedReqs }).then(res => {
+          this.setUserName(this.yourName)
+          this.setUserFunctionalReqs(this.checkedReqs)
+        })
+      }
+    },
+    ...mapMutations(['setUserName', 'setUserFunctionalReqs'])
   }
 }
 </script>

@@ -79,6 +79,48 @@ class SparqlRepository
         return $this->execute($sparql, 0);
     }
 
+    function getSubclassOf($funcReq) {
+        $sparql = 'SELECT ?subclass WHERE { ?subclass rdfs:subClassOf data:' . $funcReq . ' }';
+
+        return $this->execute($sparql, 0);
+    }
+
+    function getIndividuals($obj) {
+        $sparql = 'SELECT ?ind WHERE { ?ind a owl:NamedIndividual , data:' . $obj . ' }';
+
+        return $this->execute($sparql, 0);
+    }
+
+    function getTreeFromFunc($funcReqs) {
+        return $this->getFuncTree($funcReqs);
+    }
+
+    function getTreeFromAllFunc() {
+        return $this->getFuncTree($this->getAllFunctionalRequirements());
+    }
+
+    private function getFuncTree($res) {
+        $arr = [];
+
+        foreach ($res as $r) {
+            $subclasses = $this->getSubclassOf($r);
+            if (count($subclasses)) {
+                foreach ($subclasses as $subclass) {
+                    $individuals = $this->getIndividuals($subclass);
+
+                    if (count($individuals)) {
+                        $arr[$r]['subclasses'][$subclass]['individuals'] = $individuals;
+                    }
+                }
+            } else {
+                $individuals = $this->getIndividuals($r);
+                $arr[$r]['individuals'] = $individuals;
+            }
+        }
+
+        return $arr;
+    }
+
     function hasSpec($laptop)
     {
         $sparql = 'SELECT ?spec WHERE { data:' . $laptop . ' data:hasSpec ?spec }';
