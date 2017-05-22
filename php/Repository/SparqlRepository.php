@@ -166,7 +166,8 @@ class SparqlRepository
     }
 
     function getProductsFromFuncIndividual($funcIndividual) {
-        $suppQuery = 'SELECT ?supp WHERE { data:' . $funcIndividual . ' data:SuppBy ?supp }';
+        $ind = str_replace('&', '\&', $funcIndividual);
+        $suppQuery = 'SELECT ?supp WHERE { data:' . $ind . ' data:SuppBy ?supp }';
         $suppBy = array_map(function ($supp) {
             return 'data:' . $supp;
         }, $this->execute($suppQuery));
