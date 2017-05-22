@@ -17,9 +17,11 @@ $app->group('/product-individuals', function () {
             $res = array_merge($res, $sparql->getProductsFromFuncIndividual($checkedInd));
         }
 
+        $unique = array_unique($res);
+
         return $response->withJson([
-            'next' => count($res) > 0,
-            'products' => Serializer::deserialize($res)
+            'next' => count($unique) > 0,
+            'products' => Serializer::deserialize($unique)
         ]);
     });
 });
