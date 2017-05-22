@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 
 export default {
   name: 'hello',
@@ -53,7 +53,7 @@ export default {
     isDataValid () {
       return this.nameLength && this.checkedReqs.length
     },
-    ...mapGetters(['api'])
+    ...mapState(['api'])
   },
   methods: {
     fetchData () {
@@ -66,10 +66,16 @@ export default {
         this.$http.post(`${this.api}/functional-requirement`, { checkedReqs: this.checkedReqs }).then(res => {
           this.setUserName(this.yourName)
           this.setUserFunctionalReqs(this.checkedReqs)
+
+          if (res.body.next) {
+            this.setUserIndividuals(res.body.individuals)
+
+            this.$router.push('func-individuals')
+          }
         })
       }
     },
-    ...mapMutations(['setUserName', 'setUserFunctionalReqs'])
+    ...mapMutations(['setUserName', 'setUserFunctionalReqs', 'setUserIndividuals'])
   }
 }
 </script>

@@ -99,6 +99,50 @@ class SparqlRepository
         return $this->getFuncTree($this->getAllFunctionalRequirements());
     }
 
+    function getIndividualsFromFunc($res) {
+        $arr = [];
+
+        foreach ($res as $r) {
+            $subclasses = $this->getSubclassOf($r);
+            if (count($subclasses)) {
+                foreach ($subclasses as $subclass) {
+                    $individuals = $this->getIndividuals($subclass);
+
+                    if (count($individuals)) {
+                        $arr = array_merge($arr, $individuals);
+                    }
+                }
+            } else {
+                $individuals = $this->getIndividuals($r);
+                $arr = array_merge($arr, $individuals);
+            }
+        }
+
+        return $arr;
+    }
+
+    function getIndividualsFromFunc2($res) {
+        $arr = [];
+
+        foreach ($res as $r) {
+            $subclasses = $this->getSubclassOf($r);
+            if (count($subclasses)) {
+                foreach ($subclasses as $subclass) {
+                    $individuals = $this->getIndividuals($subclass);
+
+                    if (count($individuals)) {
+                        $arr[$r] = $individuals;
+                    }
+                }
+            } else {
+                $individuals = $this->getIndividuals($r);
+                $arr[$r] = $individuals;
+            }
+        }
+
+        return $arr;
+    }
+
     private function getFuncTree($res) {
         $arr = [];
 
@@ -121,6 +165,16 @@ class SparqlRepository
         return $arr;
     }
 
+    function getProductsFromFuncIndividual($funcIndividual) {
+        $suppQuery = 'SELECT ?supp WHERE { data:' . $funcIndividual . ' data:SuppBy ?supp }';
+        $suppBy = array_map(function ($supp) {
+            return 'data:' . $supp;
+        }, $this->execute($suppQuery));
+
+        $getProductsFromSuppQuery = 'SELECT ?laptop WHERE { ?laptop data:hasSpec ' . implode(',', $suppBy) . ' }';
+        return $this->execute($getProductsFromSuppQuery);
+    }
+
     function hasSpec($laptop)
     {
         $sparql = 'SELECT ?spec WHERE { data:' . $laptop . ' data:hasSpec ?spec }';
@@ -128,7 +182,7 @@ class SparqlRepository
         return $this->execute($sparql, 1);
     }
 
-    function hasBattery($lapptop)
+    function hasBattery($laptop)
     {
         $sparql = 'SELECT ?battery WHERE { data:' . $laptop . ' data:hasBattery ?battery }';
 

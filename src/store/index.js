@@ -5,13 +5,15 @@ Vue.use(Vuex)
 
 const state = {
   api: 'http://localhost:6969',
-  name: '',
-  functionalReqs: []
+  userName: '',
+  functionalReqs: [],
+  funcIndividuals: []
 }
 
 const mutations = {
-  setUserName (state, name) { state.name = name },
-  setUserFunctionalReqs (state, reqs) { state.functionalReqs = reqs }
+  setUserName (state, name) { state.userName = name },
+  setUserFunctionalReqs (state, reqs) { state.functionalReqs = reqs },
+  setUserIndividuals (state, inds) { state.funcIndividuals = inds }
 }
 
 const getters = {
