@@ -1,23 +1,23 @@
 <template>
   <div class="container">
     <h1>Hai {{ userName }},</h1>
-    <h2>pilih beberapa kriteria laptop yang sesuai dengan minatmu</h2>
+    <h2>pilih beberapa laptop yang sesuai dengan minatmu</h2>
     <div class="row">
       <div class="col-sm-6 col-sm-offset-3">
         <table class="table table-striped">
           <tbody>
-            <tr v-for="(individual, index) in funcIndividuals" :key="index">
-              <td><input type="checkbox" id="checkbox" v-model="checkedInds" :value="individual"></td>
+            <tr v-for="(product, index) in productsFromFuncIndividuals" :key="index">
+              <td><input type="checkbox" id="checkbox" v-model="checkedProducts" :value="product"></td>
               <td>{{ index+1 }}</td>
-              <td>{{ individual }}</td>
+              <td>{{ product }}</td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="col-sm-6 col-sm-offset-3">
-        <h3>Selected Requirements:</h3>
+        <h3>Selected Laptops:</h3>
         <ol>
-          <li v-for="ind in checkedInds">{{ ind }}</li>
+          <li v-for="product in checkedProducts">{{ product }}</li>
         </ol>
       </div>
     </div>
@@ -37,17 +37,17 @@
 import { mapState, mapMutations } from 'vuex'
 
 export default {
-  name: 'funcIndividuals',
+  name: 'productFromIndividuals',
   data () {
     return {
-      checkedInds: []
+      checkedProducts: []
     }
   },
   computed: {
     isDataValid () {
-      return this.checkedInds.length
+      return this.checkedProducts.length
     },
-    ...mapState(['funcIndividuals', 'userName', 'api'])
+    ...mapState(['productsFromFuncIndividuals', 'userName'])
   },
   methods: {
     onPrevClicked () {
@@ -55,16 +55,13 @@ export default {
     },
     onNextClicked () {
       if (this.isDataValid) {
-        this.$http.post(`${this.api}/product-individuals`, { checkedInds: this.checkedInds }).then(res => {
-          // this.setUserName(this.yourName)
-          // this.setUserFunctionalReqs(this.checkedReqs)
+        // this.$http.post(`${this.api}/product-individuals`, { checkedInds: this.checkedInds }).then(res => {
+        //   if (res.body.next) {
+        //     this.setProductsFromFuncIndividuals(res.body.individuals)
 
-          if (res.body.next) {
-            this.setProductsFromFuncIndividuals(res.body.products)
-
-            this.$router.push('prod-individuals')
-          }
-        })
+        //     this.$router.push('prod-individuals')
+        //   }
+        // })
       }
     },
     ...mapMutations(['setProductsFromFuncIndividuals'])
