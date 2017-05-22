@@ -4,7 +4,7 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 const state = {
-  api: 'http://localhost:6969',
+  api: 'http://localhost:7000',
   userName: '',
   functionalReqs: [],
   funcIndividuals: []
