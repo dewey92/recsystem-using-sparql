@@ -11,17 +11,23 @@ $app->group('/product-individuals', function () {
         $sparql = $this->get('sparql');
 
         $checkedInds = Serializer::serialize($parsedBody['checkedInds']);
-        $res = [];
-
-        foreach ($checkedInds as $checkedInd) {
-            $res = array_merge($res, $sparql->getProductsFromFuncIndividual($checkedInd));
-        }
-
-        $unique = array_unique($res);
+        $res = $sparql->getProductsFromFuncIndividuals($checkedInds, $parsedBody['price'], $parsedBody['brand']);
 
         return $response->withJson([
-            'next' => count($unique) > 0,
-            'products' => Serializer::deserialize($unique)
+            'next' => count($res) > 0,
+            'products' => Serializer::deserialize($res)
         ]);
     });
+});
+
+$app->post('/product-details', function (Request $request, Response $response) {
+    $parsedBody = $request->getParsedBody();
+    $sparql = $this->get('sparql');
+
+    $name = Serializer::serialize([$parsedBody['name']])[0];
+    $res = $sparql->getProductDetails($name);
+
+    return $response->withJson([
+        'details' => Serializer::deserialize($res)
+    ]);
 });

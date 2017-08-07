@@ -1,15 +1,27 @@
 <template>
   <div class="container">
-    <h1>Hai {{ userName }},</h1>
-    <h2>pilih beberapa laptop yang sesuai dengan minatmu</h2>
+    <h1>Hai {{ userName }}!</h1>
+    <h2>Pilih beberapa laptop yang sesuai dengan minatmu.</h2>
+    <h2><small>Klik untuk melihat detail spesifikasi laptop</small></h2>
     <div class="row">
-      <div class="col-sm-6 col-sm-offset-3">
+      <div class="col-sm-8 col-sm-offset-2">
         <table class="table table-striped">
           <tbody>
             <tr v-for="(product, index) in productsFromFuncIndividuals" :key="index">
-              <td><input type="checkbox" id="checkbox" v-model="checkedProducts" :value="product"></td>
+              <td><input type="checkbox" id="checkbox" v-model="checkedProducts" :value="product.name"></td>
               <td>{{ index+1 }}</td>
-              <td>{{ product }}</td>
+              <td>
+                <a href="#" @click.prevent="onIndividualLaptopClicked(product, index)">{{ product.name }}</a>
+                <div v-show="product.shown">
+                  <table class="table">
+                    <tr v-for="(val, key) in product.details">
+                      <td align="right"><strong>{{ key }}</strong></td>
+                      <td style="padding: 0 5px;">:</td>
+                      <td align="left">{{ val }}</td>
+                    </tr>
+                  </table>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -47,7 +59,7 @@ export default {
     isDataValid () {
       return this.checkedProducts.length
     },
-    ...mapState(['productsFromFuncIndividuals', 'userName'])
+    ...mapState(['productsFromFuncIndividuals', 'userName', 'api'])
   },
   methods: {
     onPrevClicked () {
@@ -63,6 +75,30 @@ export default {
         //   }
         // })
       }
+    },
+    onIndividualLaptopClicked (product, index) {
+      if (!product.clicked) {
+        this.$http.post(`${this.api}/product-details`, { name: product.name }).then(res => {
+          const details = res.body.details.reduce((acc, val, i, arr) => {
+            if (i % 2 === 0) {
+              const currKey = arr[i].replace(/^has/, '')
+              const currVal = arr[i + 1]
+
+              acc[currKey] = acc[currKey] ? (acc[currKey] + ' ' + currVal) : currVal
+            }
+
+            return acc
+          }, {})
+
+          this.updateProducts(product, index, { details, clicked: true })
+        })
+      } else {
+        this.updateProducts(product, index, {})
+      }
+    },
+    updateProducts (product, index, newObj) {
+      const updatedProduct = Object.assign({}, product, newObj, { shown: !product.shown })
+      this.$set(this.productsFromFuncIndividuals, index, updatedProduct)
     },
     ...mapMutations(['setProductsFromFuncIndividuals'])
   }

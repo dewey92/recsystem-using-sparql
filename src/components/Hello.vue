@@ -5,25 +5,27 @@
         <li class="next"><a href="#">Next <span aria-hidden="true">&rarr;</span></a></li>
       </ul>
     </nav>-->
-    <h1>Hai <input type="text" id="your-name" placeholder="Nama Kamu..." v-model="yourName" :size="nameLength || 13">,</h1>
-    <h1>Laptop Kamu akan Digunakan untuk Apa?</h1>
+    <h1>Hai <input type="text" id="your-name" class="input--borderless" placeholder="Nama Kamu..." v-model="yourName" :size="nameLength || 13">,</h1>
+    <h1>Silakan isi preferensi kamu sebelum memilih laptop</h1>
     <div class="row">
       <div class="col-sm-6 col-sm-offset-3">
-        <table class="table table-striped">
-          <tbody>
-            <tr v-for="(req, index) in funcReq" :key="index">
-              <td><input type="checkbox" id="checkbox" v-model="checkedReqs" :value="req"></td>
-              <td>{{ index+1 }}</td>
-              <td>{{ req }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="col-sm-6 col-sm-offset-3">
-        <h3>Selected Requirements:</h3>
-        <ol>
-          <li v-for="req in checkedReqs">{{ req }}</li>
-        </ol>
+        <form class="form-horizontal">
+          <div class="form-group form-group-lg has-feedback">
+            <label for="inputHarga" class="col-sm-3 control-label">Harga &lt;</label>
+            <div class="col-sm-9">
+              <div class="input-group">
+                <span class="input-group-addon">&dollar;</span>
+                <input v-model="userPreferences.price" class="form-control" id="inputHarga" placeholder="Preferensi Harga..">
+              </div>
+            </div>
+          </div>
+          <div class="form-group form-group-lg">
+            <label for="inputMerek" class="col-sm-3 control-label">Merk</label>
+            <div class="col-sm-9">
+              <input v-model="userPreferences.brand" class="form-control" id="inputMerek" placeholder="Preferensi Merk..">
+            </div>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -32,18 +34,17 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapMutations } from 'vuex'
 
 export default {
   name: 'hello',
-  created () {
-    this.fetchData()
-  },
   data () {
     return {
       yourName: '',
-      funcReq: [],
-      checkedReqs: []
+      userPreferences: {
+        price: 450,
+        brand: 'Asus'
+      }
     }
   },
   computed: {
@@ -51,31 +52,19 @@ export default {
       return this.yourName.trim().length
     },
     isDataValid () {
-      return this.nameLength && this.checkedReqs.length
-    },
-    ...mapState(['api'])
+      return this.nameLength && this.userPreferences.price > 0 && this.userPreferences.brand
+    }
   },
   methods: {
-    fetchData () {
-      this.$http.get(`${this.api}/functional-requirement`).then(res => {
-        this.funcReq = res.body
-      })
-    },
     onNextClicked () {
       if (this.isDataValid) {
-        this.$http.post(`${this.api}/functional-requirement`, { checkedReqs: this.checkedReqs }).then(res => {
-          this.setUserName(this.yourName)
-          this.setUserFunctionalReqs(this.checkedReqs)
+        this.setUserName(this.yourName)
+        this.setUserPreferences(this.userPreferences)
 
-          if (res.body.next) {
-            this.setUserIndividuals(res.body.individuals)
-
-            this.$router.push('func-individuals')
-          }
-        })
+        this.$router.push('func-level-one')
       }
     },
-    ...mapMutations(['setUserName', 'setUserFunctionalReqs', 'setUserIndividuals'])
+    ...mapMutations(['setUserName', 'setUserPreferences'])
   }
 }
 </script>
@@ -86,7 +75,7 @@ h1, h2 {
   font-weight: normal;
 }
 
-#your-name {
+.input--borderless {
   border: none;
   border-bottom: 2px dotted #aaa;
   outline: none;

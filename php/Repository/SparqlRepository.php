@@ -35,6 +35,8 @@ class SparqlRepository
             }
         }
 
+        // print_r($result);
+
         return $return;
     }
 
@@ -165,15 +167,48 @@ class SparqlRepository
         return $arr;
     }
 
-    function getProductsFromFuncIndividual($funcIndividual) {
+    function getProductsFromFuncIndividual($funcIndividual, $price, $brand) {
         $ind = str_replace('&', '\&', $funcIndividual);
         $suppQuery = 'SELECT ?supp WHERE { data:' . $ind . ' data:SuppBy ?supp }';
         $suppBy = array_map(function ($supp) {
             return 'data:' . $supp;
         }, $this->execute($suppQuery));
 
-        $getProductsFromSuppQuery = 'SELECT ?laptop WHERE { ?laptop data:hasSpec ' . implode(',', $suppBy) . ' }';
+        $getProductsFromSuppQuery = "
+            SELECT ?laptop WHERE {
+                { ?laptop data:hasSpec " . implode(',', $suppBy) . " }
+                { ?laptop data:hasPrice ?price }
+                { ?laptop data:hasBrand ?brand }
+                FILTER (?price < $price)
+                FILTER regex(?brand, \"" . $brand . "\", \"i\")
+            }
+        ";
         return $this->execute($getProductsFromSuppQuery);
+    }
+
+    function getProductsFromFuncIndividuals($inds, $price, $brand) {
+        $res = [];
+
+        foreach ($inds as $ind) {
+            $res = array_merge($res, $this->getProductsFromFuncIndividual($ind, $price, $brand));
+        }
+
+        return array_values(array_unique($res));
+    }
+
+    function getProductDetails($name) {
+        $query = "
+            SELECT ?spec_key ?spec_value
+            WHERE {
+              data:$name ?spec_key ?spec_value
+              FILTER(
+                ?spec_key != data:hasSpec &&
+                ?spec_key != <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+              )
+            }
+        ";
+
+        return $this->execute($query, 0);
     }
 
     function hasSpec($laptop)

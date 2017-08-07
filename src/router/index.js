@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Hello from '@/components/Hello'
+import SelectFunctionalReqLevelOne from '@/components/SelectFunctionalReqLevelOne'
 import FuncIndividuals from '@/components/FuncIndividuals'
 import ProductFromIndividuals from '@/components/ProductFromIndividuals'
 
@@ -12,6 +13,11 @@ export default new Router({
       path: '/',
       name: 'Hello',
       component: Hello
+    },
+    {
+      path: '/func-level-one',
+      name: 'SelectFunctionalReqLevelOne',
+      component: SelectFunctionalReqLevelOne
     },
     {
       path: '/func-individuals',

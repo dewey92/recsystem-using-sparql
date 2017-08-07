@@ -1,7 +1,8 @@
 <template>
   <div class="container">
-    <h1>Hai {{ userName }},</h1>
-    <h2>pilih beberapa kriteria laptop yang sesuai dengan minatmu</h2>
+    <h1>Hai {{ userName }}!</h1>
+    <h2>Produk yang kami rekomendasikan lebih dari 10 produk,</h2>
+    <h2>silahkan pilih kebutuhan fungsional yang Anda perlukan</h2>
     <div class="row">
       <div class="col-sm-6 col-sm-offset-3">
         <table class="table table-striped">
@@ -19,6 +20,30 @@
         <ol>
           <li v-for="ind in checkedInds">{{ ind }}</li>
         </ol>
+      </div>
+    </div>
+
+    <div class="row" v-if="noLaptop">
+      <div class="col-sm-6 col-sm-offset-3">
+        <h3>Oops, maaf laptop yang kamu cari tidak ada. Coba ubah harga dan merek kamu</h3>
+
+        <form class="form-horizontal">
+          <div class="form-group form-group-lg has-feedback">
+            <label for="inputHarga" class="col-sm-3 control-label">Harga &lt;</label>
+            <div class="col-sm-9">
+              <div class="input-group">
+                <span class="input-group-addon">&dollar;</span>
+                <input v-model="updatedPrice" class="form-control" id="inputHarga" placeholder="Preferensi Harga..">
+              </div>
+            </div>
+          </div>
+          <div class="form-group form-group-lg">
+            <label for="inputMerek" class="col-sm-3 control-label">Merk</label>
+            <div class="col-sm-9">
+              <input v-model="updatedBrand" class="form-control" id="inputMerek" placeholder="Preferensi Merk..">
+            </div>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -40,14 +65,23 @@ export default {
   name: 'funcIndividuals',
   data () {
     return {
-      checkedInds: []
+      checkedInds: [],
+      noLaptop: false
     }
   },
   computed: {
     isDataValid () {
-      return this.checkedInds.length
+      return this.checkedInds.length && this.updatedPrice > 0 && this.updatedBrand
     },
-    ...mapState(['funcIndividuals', 'userName', 'api'])
+    updatedPrice: {
+      get () { return this.userPreferences.price },
+      set (price) { this.setUserPreferences(Object.assign({}, this.userPreferences, { price })) }
+    },
+    updatedBrand: {
+      get () { return this.userPreferences.brand },
+      set (brand) { this.setUserPreferences(Object.assign({}, this.userPreferences, { brand })) }
+    },
+    ...mapState(['funcIndividuals', 'userName', 'api', 'userPreferences'])
   },
   methods: {
     onPrevClicked () {
@@ -55,19 +89,24 @@ export default {
     },
     onNextClicked () {
       if (this.isDataValid) {
-        this.$http.post(`${this.api}/product-individuals`, { checkedInds: this.checkedInds }).then(res => {
-          // this.setUserName(this.yourName)
-          // this.setUserFunctionalReqs(this.checkedReqs)
+        const data = {
+          checkedInds: this.checkedInds,
+          price: this.userPreferences.price,
+          brand: this.userPreferences.brand
+        }
 
+        this.$http.post(`${this.api}/product-individuals`, data).then(res => {
           if (res.body.next) {
             this.setProductsFromFuncIndividuals(res.body.products)
 
             this.$router.push('prod-individuals')
+          } else {
+            this.noLaptop = true
           }
         })
       }
     },
-    ...mapMutations(['setProductsFromFuncIndividuals'])
+    ...mapMutations(['setProductsFromFuncIndividuals', 'setUserPreferences'])
   }
 }
 </script>
